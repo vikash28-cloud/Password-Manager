@@ -1,0 +1,11 @@
+saving to local storage 43:09
+
+LEARNING ----
+local storage 
+array destructuring
+uuid
+filter function
+json.stringyfy
+
+ENHANCE -----
+password suggest
