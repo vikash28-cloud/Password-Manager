@@ -45,7 +45,7 @@ const Manager = () => {
       progress: undefined,
       theme: "light",
     });
-    navigator.clipboard.writeText(item);
+    // navigator.clipboard.writeText(item);
   }
   const deletePassword = (id) => {
     console.log("deleting password using id: ",id);
@@ -63,7 +63,7 @@ const Manager = () => {
         progress: undefined,
         theme: "light",
       });
-      navigator.clipboard.writeText(item);
+      // navigator.clipboard.writeText(item);
     }
     
     
@@ -95,7 +95,7 @@ const Manager = () => {
 
   return (
     <>
-      <ToastContainer
+      {/* <ToastContainer
         position="top-right"
         autoClose={5000}
         hideProgressBar={false}
@@ -107,8 +107,8 @@ const Manager = () => {
         pauseOnHover
         theme="light"
         transition="Bounce"
-      />
-      <ToastContainer />
+      /> */}
+      {/* <ToastContainer /> */}
 
 
       <div className="px-2 md:px-0 md:mycontainer min-h-[85vh]">
@@ -221,7 +221,7 @@ const Manager = () => {
         </div>
       </div>
 
-
+    <ToastContainer/>
     </>
   )
 }
