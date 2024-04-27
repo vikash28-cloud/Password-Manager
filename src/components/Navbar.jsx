@@ -15,8 +15,8 @@ const Navbar = () => {
         <ul>
           <li className='flex gap-4'>
             <a className='hover:font-bold' href="/">home</a>
-            <a className='hover:font-bold' href="#">about</a>
-            <a className='hover:font-bold' href="#">contact</a>
+            <a className='hover:font-bold' href="/login">Login</a>
+            <a className='hover:font-bold' href="/signup">SignUp</a>
           </li>
         </ul>
         <a href="https://github.com/vikash28-cloud" target='_blank'>
