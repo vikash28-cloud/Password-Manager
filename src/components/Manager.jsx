@@ -2,20 +2,90 @@ import React, { useRef, useState, useEffect } from 'react'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { v4 as uuidv4 } from 'uuid';
+import axios from 'axios';
+import { API_BASE_URL } from '../config';
+
 
 const Manager = () => {
+  const [loading, setloading] = useState("");
   const ref = useRef();
   const passwordRef = useRef();
   const [form, setform] = useState({ site: "", username: "", password: "" });
-  const [passwordArray, setpasswordArray] = useState([])
+  const [MyPasswords, setMyPasswords] = useState("");
+  // const [passwordArray, setpasswordArray] = useState([])
+
+
+  const CONFIG_OBJ = {
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + localStorage.getItem('token')
+    }
+  }
+
+  const savePassword = async () => {
+    if (form.site === '') {
+      toast.error("Please enter site name", {
+        position: "top-right"
+      });
+    }else if (form.username === '') {
+      toast.error("Please enter site username", {
+        position: "top-right"
+      });
+    }else if (form.password === '') {
+      toast.error("Please enter the password", {
+        position: "top-right"
+      });
+    } else {
+      setloading(true);
+      //add validation
+      const request = { site: form.site, username:form.username, password:form.password };
+      //write API call for create post request
+      await axios.post(`${API_BASE_URL}/`, request, CONFIG_OBJ)
+        .then((response) => {
+          if (response.status === 201) {
+            setloading(false);
+            getPasswords();
+            toast.success("Password saved Successfully!", {
+              position: "top-right"
+            });
+          }
+          setform({ site: "", username: "", password: "" });
+        })
+        .catch((err) => {
+          setloading(false);
+          console.log(err);
+          toast.error(err.response.data.Error, {
+            position: "top-right"
+          });
+        });
+
+    }
+  }
+
+  const getPasswords = async () => {
+    await axios.get(`${API_BASE_URL}/`, CONFIG_OBJ)
+        .then((response) => {
+            if (response.status === 200) {
+                console.log(response);
+                setMyPasswords(response.data.Passwords);
+            }
+        })
+        .catch((err) => {
+            toast.error(err.response.data.Error, {
+                position: "top-right"
+            });
+        });
+}
+
+
 
   useEffect(() => {
 
-    let passwords = localStorage.getItem("passwords");
-    if (passwords) {
-      setpasswordArray(JSON.parse(passwords))
-    }
-
+    // let passwords = localStorage.getItem("passwords");
+    // if (passwords) {
+    //   setpasswordArray(JSON.parse(passwords))
+    // }
+    getPasswords();
   }, [])
 
 
@@ -30,48 +100,50 @@ const Manager = () => {
       ref.current.src = "/crossEye.png"
     }
   }
-  const savePassword = () => {
-    setpasswordArray([...passwordArray, {...form, id:uuidv4()}])
-    localStorage.setItem("passwords", JSON.stringify([...passwordArray, {...form, id:uuidv4()}]));
-    console.log(passwordArray);
-    setform({ site: "", username: "", password: "" });
-    toast('Password Saved successfully', {
-      position: "top-right",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "light",
-    });
-    // navigator.clipboard.writeText(item);
-  }
-  const deletePassword = (id) => {
+  // const savePassword = () => {
+  //   setpasswordArray([...passwordArray, {...form, id:uuidv4()}])
+  //   localStorage.setItem("passwords", JSON.stringify([...passwordArray, {...form, id:uuidv4()}]));
+  //   console.log(passwordArray);
+  //   setform({ site: "", username: "", password: "" });
+  //   toast('Password Saved successfully', {
+  //     position: "top-right",
+  //     autoClose: 5000,
+  //     hideProgressBar: false,
+  //     closeOnClick: true,
+  //     pauseOnHover: true,
+  //     draggable: true,
+  //     progress: undefined,
+  //     theme: "light",
+  //   });
+  //   // navigator.clipboard.writeText(item);
+  // }
+  const deletePassword = async(id) => {
     console.log("deleting password using id: ",id);
     let cnfrm= confirm("do you really wan to delete password")
     if(cnfrm){
-      setpasswordArray(passwordArray.filter(item=>item.id!==id))
-      localStorage.setItem("passwords", JSON.stringify(passwordArray.filter(item=>item.id!==id)));
-      toast('Password Deleted successfully', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
+      await axios.delete(`${API_BASE_URL}/${id}`, CONFIG_OBJ)
+      .then((response) => {
+        if (response.status === 200) {
+          getPasswords();
+          toast.success("Deleted Successfully!", {
+            position: "top-right"
+          });
+        }
+      })
+      .catch((err) => {
+        toast.error(err.response.data.Error, {
+          position: "top-right"
+        });
       });
       // navigator.clipboard.writeText(item);
     }
     
     
   }
-  const editPassword = (id) => {
-    console.log("editing password using id: ",id);
-    setform(passwordArray.filter(item=>item.id===id)[0])
-    setpasswordArray((passwordArray.filter(item=>item.id!==id)));
+  const editPassword = async(item) => {
+    console.log("editing password using id: ",item._id);
+    setform({site: item.site, username: item.username, password: item.password});
+    // setpasswordArray((passwordArray.filter(item=>item.id!==id)));
     // console.log(passwordArray);
   }
   const handleChange = (e) => {
@@ -136,6 +208,9 @@ const Manager = () => {
               trigger="hover">
             </lord-icon>
             Add Password
+            {loading ? <div className="spinner-border spinner-border-sm text-light ms-2" role="status">
+                      <span className="visually-hidden">Loading...</span>
+                    </div> : ""}
           </button>
 
 
@@ -143,9 +218,9 @@ const Manager = () => {
         <div className="passwords">
           <h2 className='font-bold text-3xl py-2'>Your Passwords</h2>
 
-          {passwordArray.length === 0 && <div>no passwords to show</div>}
+          {MyPasswords.length === 0 && <div>no passwords to show</div>}
 
-          {passwordArray.length != 0 && <table className="table-auto w-full rounded-md overflow-hidden">
+          {MyPasswords.length != 0 && <table className="table-auto w-full rounded-md overflow-hidden">
             <thead className='bg-purple-800 text-white'>
               <tr>
                 <th className='py-2'>Site</th>
@@ -155,7 +230,7 @@ const Manager = () => {
               </tr>
             </thead>
             <tbody className='bg-purple-100'>
-              {passwordArray.map((item, index) => {
+              {MyPasswords.map((item, index) => {
                 return <tr key={index}>
 
                   <td className='py-2 text-center first-letter border border-white'>
@@ -191,7 +266,7 @@ const Manager = () => {
 
                   <td className='py-2 text-center  first-letter border border-white '>
 
-                    <span className='cursor-pointer mx-2' onClick={()=>{deletePassword(item.id)}}>
+                    <span className='cursor-pointer mx-2' onClick={()=>{deletePassword(item._id)}}>
                       <lord-icon
                         src="https://cdn.lordicon.com/drxwpfop.json"
                         trigger="hover"
@@ -199,7 +274,7 @@ const Manager = () => {
                         style={{ "width": "28px", "height": "28px" }}>
                       </lord-icon>
                     </span>
-                    <span className='cursor-pointer mx-2' onClick={()=>{editPassword(item.id)}}>
+                    <span className='cursor-pointer mx-2' onClick={()=>{editPassword(item)}}>
                       <lord-icon
                         src="https://cdn.lordicon.com/wuvorxbv.json"
                         trigger="hover"
