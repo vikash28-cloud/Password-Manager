@@ -1,9 +1,69 @@
-import React from 'react'
-
+import React, { useState } from 'react';
+import { API_BASE_URL } from '../config';
+import axios from 'axios';
+import {Link, useNavigate } from 'react-router-dom';
+import {useDispatch} from 'react-redux';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Login = () => {
+    const [email, setemail] = useState("");
+    const [password, setpassword] = useState("");
+
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+
+    const [loading, setloading] = useState(false);
+
+    const login = (e) => {
+        e.preventDefault();
+        setloading(true);
+
+        const requestData = { email:email, password }
+        axios.post(`${API_BASE_URL}/login`, requestData)
+            .then((result) => {
+                if (result.status===200) {
+                    setloading(false);
+
+                    localStorage.setItem("token", result.data.result.token);
+                    localStorage.setItem("user", JSON.stringify(result.data.result.user));
+                    dispatch({type:'LOGIN_SUCCESS',payload: result.data.result.user});
+                    setloading(false);
+                    navigate('/');
+
+                    toast('Logged in successfully', {
+                        position: "top-right",
+                        autoClose: 5000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        theme: "light",
+                      });
+                }
+                setemail("");
+                setpassword("");
+            })
+            .catch((err) => {
+                setloading(false);
+
+                console.log(err);
+                toast.error(err.response.data.Error, {
+                    position: "top-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                  });
+            });
+    }
     return <>
-        <form action="/" method='post'>
+        <ToastContainer/>
+        <form action="/" method='post' onSubmit={(e)=>login(e)}>
 
             <main class="flex h-screen w-full items-center justify-center px-4 md:px-6">
                 <div class="rounded-lg border bg-card text-card-foreground shadow-sm w-full max-w-md" data-v0-t="card">
@@ -20,6 +80,7 @@ const Login = () => {
                                 Email
                             </label>
                             <input
+                                value={email} onChange={(e) => setemail(e.target.value)}
                                 class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                 id="email"
                                 placeholder="name@example.com"
@@ -40,6 +101,7 @@ const Login = () => {
                                 </a>
                             </div>
                             <input
+                                value={password} onChange={(e) => setpassword(e.target.value)}
                                 class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                 id="password"
                                 required=""
@@ -53,8 +115,12 @@ const Login = () => {
                             type="submit"
                         >
                            LogIn
+                           {loading ? <div className="spinner-border spinner-border-sm text-light ms-2" role="status">
+                                    <span className="visually-hidden">Loading...</span>
+                                </div> : ""}
                         </button>
                     </div>
+                    <p style={{ fontSize: "14px", paddingLeft:"22px", paddingBottom:"20px" }}>Don't have an account? <Link to='/signup' style={{color:"blue"}}>Signup here</Link></p>
                 </div>
             </main>
 

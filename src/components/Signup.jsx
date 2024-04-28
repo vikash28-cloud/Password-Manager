@@ -1,8 +1,61 @@
-import React from 'react'
+import React, { useState } from 'react';
+import { API_BASE_URL } from '../config';
+import axios from 'axios';
+import {Link} from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Signup = () => {
+    const [fullName, setfullName] = useState("");
+    const [email, setemail] = useState("");
+    const [password, setpassword] = useState("");
+
+    const [loading, setloading] = useState(false);
+
+    const signup = (e) => {
+        e.preventDefault();
+        setloading(true);
+
+        const requestData = { fullName: fullName, email, password }
+        axios.post(`${API_BASE_URL}/signup`, requestData)
+            .then((result) => {
+                if (result.status === 201) {
+                    setloading(false);
+                    toast('Signed Up successfully', {
+                        position: "top-right",
+                        autoClose: 5000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        theme: "light",
+                      });
+                }
+                setfullName("");
+                setemail("");
+                setpassword("");
+            })
+            .catch((err) => {
+                setloading(false);
+
+                console.log(err);
+                toast.error(err.response.data.Error, {
+                    position: "top-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                  });
+
+            });
+    }
     return <>
-        <form action="/" method='post'>
+        <ToastContainer/>
+        <form action="/" method='post' onSubmit={(e)=>signup(e)}>
 
             <main class="flex h-screen w-full items-center justify-center px-4 md:px-6">
                 <div class="rounded-lg border bg-card text-card-foreground shadow-sm w-full max-w-md" data-v0-t="card">
@@ -19,6 +72,7 @@ const Signup = () => {
                                 Name
                             </label>
                             <input
+                                value={fullName} onChange={(e) => setfullName(e.target.value)}
                                 class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                 id="name"
                                 placeholder="name@example.com"
@@ -34,6 +88,7 @@ const Signup = () => {
                                 Email
                             </label>
                             <input
+                                value={email} onChange={(e) => setemail(e.target.value)}
                                 class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                 id="email"
                                 placeholder="name@example.com"
@@ -51,6 +106,7 @@ const Signup = () => {
                                 </label>
                             </div>
                             <input
+                                value={password} onChange={(e) => setpassword(e.target.value)}
                                 class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                 id="password"
                                 required=""
@@ -64,8 +120,12 @@ const Signup = () => {
                             type="submit"
                         >
                             Sign in
+                            {loading ? <div className="spinner-border spinner-border-sm text-light ms-2" role="status">
+                                    <span className="visually-hidden">Loading...</span>
+                                </div> : ""}
                         </button>
                     </div>
+                    <p style={{ fontSize: "14px", paddingLeft:"22px", paddingBottom:"20px" }}>Already have an account? <Link to='/login' style={{color:"blue"}}>Login here</Link></p>
                 </div>
             </main>
 
