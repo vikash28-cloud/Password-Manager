@@ -1,4 +1,5 @@
 const express = require('express');
+
 const {MongoClient} = require("mongodb")
 const mongoose = require('mongoose');
 const bodyParser =require ("body-parser");
@@ -13,10 +14,29 @@ const MONGO_URL = process.env.MONGO_URL;
 app.use(bodyParser.json())
 app.use(pkg())
 
+
 const url = 'mongodb://127.0.0.1:27017/password-manager';
 const client = new MongoClient(url);
+
 // Database Name
 const dbName = 'passwordManagerDB';
+
+
+mongoose.connect(MONGO_URL);
+mongoose.connection.on('connected', ()=>{
+  console.log('Connected to MongoDB');
+})
+
+mongoose.connection.on('error', (err)=>{
+  console.log('Error occurred while connecting',err);
+})
+
+require('./models/user_model');
+require('./models/password_model');
+
+app.use(require('./routes/user_route'));
+app.use(require('./routes/passwords_route'));
+
 
 
 mongoose.connect(MONGO_URL);
