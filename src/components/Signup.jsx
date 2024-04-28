@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { API_BASE_URL } from '../config';
 import axios from 'axios';
+
+import {Link} from 'react-router-dom';
+
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -124,6 +127,7 @@ const Signup = () => {
                                 </div> : ""}
                         </button>
                     </div>
+                    <p style={{ fontSize: "14px", paddingLeft:"22px", paddingBottom:"20px" }}>Already have an account? <Link to='/login' style={{color:"blue"}}>Login here</Link></p>
                 </div>
             </main>
 

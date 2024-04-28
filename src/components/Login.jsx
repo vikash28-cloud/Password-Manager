@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 import { API_BASE_URL } from '../config';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+
+import {Link, useNavigate } from 'react-router-dom';
+
+
+
 import {useDispatch} from 'react-redux';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -120,6 +124,7 @@ const Login = () => {
                                 </div> : ""}
                         </button>
                     </div>
+                    <p style={{ fontSize: "14px", paddingLeft:"22px", paddingBottom:"20px" }}>Don't have an account? <Link to='/signup' style={{color:"blue"}}>Signup here</Link></p>
                 </div>
             </main>
 
